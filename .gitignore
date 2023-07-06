@@ -1,0 +1,9 @@
+
+*.dll
+*.pdb
+*.png
+*.txt
+*.cache
+*.CopyComplete
+CommandSocketReceiver/obj/Debug/.NETFramework,Version=v4.8.AssemblyAttributes.cs
+CommandSocketReceiver/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.cs
