@@ -1,0 +1,6 @@
+*.dll
+*.cache
+*.txt
+*.pd
+IcomMediaDisplay\obj\*
+IcomMediaDisplay\bin\*
