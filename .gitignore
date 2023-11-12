@@ -2,8 +2,7 @@
 *.cache
 *.txt
 *.pd
-IcomMediaDisplay/obj/*
-IcomMediaDisplay/bin/*
-packages/*
-.vs/*
-.vs/IcomMediaDisplay/v17/.suo
+IcomMediaDisplay/obj
+IcomMediaDisplay/bin
+packages
+.vs
