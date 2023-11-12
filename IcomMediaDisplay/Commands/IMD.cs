@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Net.Http;
 using System.Net;
+using Exiled.Permissions.Extensions;
 
 namespace IcomMediaDisplay.Commands
 {
@@ -20,6 +21,13 @@ namespace IcomMediaDisplay.Commands
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
+            if (!((CommandSender)sender).CheckPermission("imd.command"))
+            {
+                response = "You do not have permission to use this command!";
+                return false;
+            }
+
+            PlaybackHandler playbackHandler = new PlaybackHandler();
             switch (arguments.At(0))
             {
                 case "play":
@@ -37,7 +45,6 @@ namespace IcomMediaDisplay.Commands
                     }
                     try
                     {
-                        PlaybackHandler playbackHandler = new PlaybackHandler();
                         playbackHandler.PlayFrames(path);
                         response = "Playback started (Keep an eye on Server console).";
                         return false;
@@ -77,12 +84,14 @@ namespace IcomMediaDisplay.Commands
                         return false;
                     }
                 case "break":
-                    PlaybackHandler playbackHandler = new PlaybackHandler();
                     playbackHandler.BreakFromPlayback();
                     response = "Stopped playback.";
                     return false;
+                case "help":
+                    response = "--- Subcommands ---\r\nimd play <pathID> - Plays frames from an directory.\r\nimd get <URL> <Filename> - Grabs an file and downloads it to \"get\" directory.\r\nimd break - Abort Playback.\r\nimd help - This.";
+                    return false;
                 default:
-                    response = "Unknown subcommand.";
+                    response = "Unknown subcommand. Use <imd help> for syntax.";
                     return false;
             }
 
