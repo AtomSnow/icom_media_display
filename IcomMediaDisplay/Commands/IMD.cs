@@ -76,7 +76,11 @@ namespace IcomMediaDisplay.Commands
                         response = "Failed to download the file. Error: " + e.Message;
                         return false;
                     }
-
+                case "break":
+                    PlaybackHandler playbackHandler = new PlaybackHandler();
+                    playbackHandler.BreakFromPlayback();
+                    response = "Stopped playback.";
+                    return false;
                 default:
                     response = "Unknown subcommand.";
                     return false;

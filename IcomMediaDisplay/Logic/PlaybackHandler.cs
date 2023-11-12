@@ -17,6 +17,7 @@ namespace IcomMediaDisplay.Logic
         private string[] frames;
         private float targetFrameDurationInSeconds;
         public int VideoFps = 30;
+        private bool breakPlayback = false;
 
         public void PlayFrames(string folderPath)
         {
@@ -46,6 +47,12 @@ namespace IcomMediaDisplay.Logic
 
             while (currentFrameIndex < frames.Length)
             {
+                if (breakPlayback)
+                {
+                    Intercom.IntercomDisplay.Network_overrideText = "Playback stopped.";
+                    breakPlayback = false;
+                    break;
+                }
                 string framePath = frames[currentFrameIndex];
                 Log.Debug($"Displaying frame: {framePath}");
 
@@ -92,6 +99,11 @@ namespace IcomMediaDisplay.Logic
                 else
                     yield return 0;
             }
+        }
+
+        public void BreakFromPlayback()
+        {
+            breakPlayback = true;
         }
 
         public string ConvertToTMPCode(Bitmap frame)
