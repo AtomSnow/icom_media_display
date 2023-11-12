@@ -42,7 +42,7 @@ namespace IcomMediaDisplay.Logic
 
         private IEnumerator<float> PlayFramesCoroutine()
         {
-            var startTime = Time.Time.time; // Record the starting time
+            var startTime = Time.Time.time;
 
             while (currentFrameIndex < frames.Length)
             {
@@ -54,30 +54,47 @@ namespace IcomMediaDisplay.Logic
                     using (FileStream stream = new FileStream(framePath, FileMode.Open, FileAccess.Read))
                     using (Bitmap frame = new Bitmap(stream))
                     {
-                        string tmpRepresentation = FrameTMP(frame);
-                        Intercom.IntercomDisplay.Network_overrideText = tmpRepresentation;
-                        Log.Debug($"Frame displayed. Text length: {tmpRepresentation.Length}");
+                        string tmpRepresentation = ConvertToTMPCode(frame);
+                        int length = tmpRepresentation.Length;
+                        int bytes = 18 + (2 * length);
+                        if (IcomMediaDisplay.instance.Config.NetworkOverflowLimit)
+                        {
+                            if (bytes > IcomMediaDisplay.instance.Config.NetworkOverflowLimitMax)
+                            {
+                                Log.Error($"Frame {currentFrameIndex} exceeds Network Message limit (65534 bytes).\nText length: {length}\nCurrent Message byte length: {bytes} bytes\nDue to Network limitations, plugin will skip this frame to save resources, because it won't be synced with clients.");
+                            }
+                            else
+                            {
+                                Intercom.IntercomDisplay.Network_overrideText = tmpRepresentation;
+                                Log.Debug($"Frame {currentFrameIndex} displayed.\nText length: {length}\nCurrent Message byte length: {bytes} bytes");
+                            }
+                        }
+                        else
+                        {
+                            Intercom.IntercomDisplay.Network_overrideText = tmpRepresentation;
+                            Log.Debug($"Frame {currentFrameIndex} displayed.\nText length: {length}\nCurrent Message byte length: {bytes} bytes");
+                        }
                         currentFrameIndex++;
                     }
                 }
                 catch (Exception ex)
                 {
                     Log.Error($"Error displaying frame: {framePath}. Details: {ex}");
-                    currentFrameIndex++; // Proceed to the next frame even if an error occurs
+                    currentFrameIndex++;
                 }
 
-                var elapsedTime = Time.Time.time - startTime; // Calculate elapsed time
+                var elapsedTime = Time.Time.time - startTime;
                 var targetTime = currentFrameIndex * targetFrameDurationInSeconds;
                 var delayTime = targetTime - elapsedTime;
 
                 if (delayTime > 0)
                     yield return Timing.WaitForSeconds(delayTime);
                 else
-                    yield return 0; // No delay if the target time has already passed
+                    yield return 0;
             }
         }
 
-        public string FrameTMP(Bitmap frame)
+        public string ConvertToTMPCode(Bitmap frame)
         {
             int height = frame.Height;
             int width = frame.Width;

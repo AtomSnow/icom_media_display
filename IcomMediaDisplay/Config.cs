@@ -14,17 +14,13 @@ namespace IcomMediaDisplay
         public bool IsEnabled { get; set; } = true;
         [Description("Whether or not the debug info should be printed out.")]
         public bool Debug { get; set; } = false;
-        [Description("Whether or not should be TMP Code be compressed. [Disable if frames are not synced correctly.]")]
-        public bool Compression { get; set; } = true;
-        [Description("Whether or not the exported frames should be saved to jpg.")]
-        public bool Jpeg { get; set; } = false;
-        [Description("[UNUSED] JPG Quality.")]
-        public int JpegQuality { get; set; } = 75;
-        [Description("[UNUSED] PNG Compression (Lossless).")]
-        public int PngCompression { get; set; } = 8;
         [Description("An pixel character to display.")]
         public string Pixel { get; set; } = "█";
-        [Description("Line height.")]
+        [Description("Line height modifier.")]
         public string Height { get; set; } = "<line-height=90%>";
+        [Description("Whether or not the Network Message should be limited.")]
+        public bool NetworkOverflowLimit { get; set; } = false;
+        [Description("Set limit (in bytes), already set to Maximum limitation to Networking library.")]
+        public int NetworkOverflowLimitMax { get; set; } = 65534;
     }
 }
