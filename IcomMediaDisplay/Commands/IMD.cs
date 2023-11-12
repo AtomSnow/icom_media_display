@@ -2,6 +2,7 @@
 using CommandSystem;
 using System;
 using IcomMediaDisplay.Logic;
+using IcomMediaDisplay.Helpers;
 using Exiled.API.Features;
 using MEC;
 using System.Collections.Generic;
@@ -28,6 +29,7 @@ namespace IcomMediaDisplay.Commands
             }
 
             PlaybackHandler playbackHandler = new PlaybackHandler();
+            Converters converters = new Converters();
             switch (arguments.At(0))
             {
                 case "play":
@@ -87,8 +89,14 @@ namespace IcomMediaDisplay.Commands
                     playbackHandler.BreakFromPlayback();
                     response = "Stopped playback.";
                     return false;
+                case "prep":
+                    string f_id = arguments.At(1);
+                    string video = arguments.At(2);
+                    converters.ExportFrames(f_id, video);
+                    response = "Preparing video, exporting frames. (Keep an eye on Server console)";
+                    return false;
                 case "help":
-                    response = "--- Subcommands ---\r\nimd play <pathID> - Plays frames from an directory.\r\nimd get <URL> <Filename> - Grabs an file and downloads it to \"get\" directory.\r\nimd break - Abort Playback.\r\nimd help - This.";
+                    response = "--- Subcommands ---\r\nimd play <folderID> - Plays frames from an directory.\r\nimd get <URL> <Filename> - Grabs an file and downloads it to \"get\" directory.\r\nimd break - Abort Playback.\r\nimd prep <folderID> <FilenameFromGetDir> - Automatically exports frames for you, requires ffmpeg.\r\nimd help - This.";
                     return false;
                 default:
                     response = "Unknown subcommand. Use <imd help> for syntax.";

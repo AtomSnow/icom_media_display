@@ -16,7 +16,7 @@ namespace IcomMediaDisplay.Logic
         private int currentFrameIndex = 0;
         private string[] frames;
         private float targetFrameDurationInSeconds;
-        public int VideoFps = 30;
+        public int VideoFps = IcomMediaDisplay.instance.Config.PlaybackFps;
         private bool breakPlayback = false;
 
         public void PlayFrames(string folderPath)

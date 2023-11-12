@@ -22,5 +22,7 @@ namespace IcomMediaDisplay
         public bool NetworkOverflowLimit { get; set; } = false;
         [Description("Set limit (in bytes), already set to Maximum limitation to Networking library.")]
         public int NetworkOverflowLimitMax { get; set; } = 65534;
+        [Description("FPS of playback.")]
+        public int PlaybackFps { get; set; } = 20;
     }
 }
