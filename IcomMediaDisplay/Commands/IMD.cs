@@ -26,28 +26,11 @@ namespace IcomMediaDisplay.Commands
                 response = "Provide video path.";
                 return false;
             }
-
-            if (arguments.At(0) == "networkLimitTest")
-            {
-                response = "Testing...";
-                Coroutine();
-                return false;
-            }
-
             response = "Okay";
             string path = arguments.At(0);
             PlaybackHandler playbackHandler = new PlaybackHandler();
             playbackHandler.PlayFrames(path);
             return false;
-        }
-
-        private IEnumerator<float> Coroutine()
-        {
-            for (int i = 0; ; i++)
-            {
-                Intercom.IntercomDisplay.Network_overrideText = i.ToString();
-                yield return Timing.WaitForSeconds(0.01f);
-            }
         }
     }
 }

@@ -22,7 +22,6 @@ namespace IcomMediaDisplay
         public override void OnEnabled()
         {
             instance = this;
-            ev = new EventHandler();
             if (!Directory.Exists(tempdir)) Directory.CreateDirectory(tempdir);
             base.OnEnabled();
         }
@@ -30,8 +29,6 @@ namespace IcomMediaDisplay
         public override void OnDisabled()
         {
             instance = null;
-            ev = null;
-
             base.OnDisabled();
         }
     }
