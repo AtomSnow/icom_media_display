@@ -6,18 +6,16 @@ namespace IcomMediaDisplay
 {
     public class IcomMediaDisplay : Plugin<Config>
     {
-        public static IcomMediaDisplay instance;
+        public static IcomMediaDisplay instance { get; private set; }
         private EventHandler ev { get; set; }
 
         public static string tempdir => Path.Combine(Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EXILED"), "Plugins"), "IcomMediaDisplay");
-        public static string FfmpegFolder => Path.Combine(tempdir, "put_ffmpeg_here");
-        public static string GetFolder => Path.Combine(tempdir, "get");
 
         // Plugin information
         public override string Name => "IcomMediaDisplay";
         public override string Prefix { get; } = "IcomMediaDisplay";
-        public override string Author { get; } = "AtomSnow";
-        public override Version Version { get; } = new Version(1, 1, 0);
+        public override string Author { get; } = "Mitsukia";
+        public override Version Version { get; } = new Version(2, 0, 0);
         public override Version RequiredExiledVersion { get; } = new Version(8, 3, 9);
 
         public override void OnEnabled()
@@ -26,9 +24,8 @@ namespace IcomMediaDisplay
             if (!Directory.Exists(tempdir))
             {
                 Directory.CreateDirectory(tempdir);
-                Directory.CreateDirectory(FfmpegFolder);
-                Directory.CreateDirectory(GetFolder);
             }
+            Log.Info("\n_____________  __________ \r\n____  _/__   |/  /__  __ \\\r\n __  / __  /|_/ /__  / / /\r\n__/ /  _  /  / / _  /_/ / \r\n/___/  /_/  /_/  /_____/  ");
             base.OnEnabled();
         }
 
