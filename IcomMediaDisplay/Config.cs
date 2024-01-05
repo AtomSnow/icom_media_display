@@ -14,20 +14,20 @@ namespace IcomMediaDisplay
         [Description("An pixel character to display.")]
         public string Pixel { get; set; } = "█";
 
-        [Description("Icomtxt Prefix and Suffix.")]
+        [Description("Icomtxt code Prefix and Suffix.")]
         public string Prefix { get; set; } = "<line-height=89%>";
         public string Suffix { get; set; } = "";
 
-        [Description("FPS of playback.")]
+        [Description("Default FPS of playback.")]
         public int PlaybackFps { get; set; } = 20;
 
-        [Description("Quantizes Bitmap before converting to code, decreases size, increases render time.")]
+        [Description("Quantizes Bitmap before converting to code, might decrease code size, increases conversion time.")]
         public bool QuantizeBitmap { get; set; } = true;
-        public int DivisorR { get; set; } = 64;
-        public int DivisorG { get; set; } = 64;
-        public int DivisorB { get; set; } = 64;
+        public int DivisorR { get; set; } = 128;
+        public int DivisorG { get; set; } = 128;
+        public int DivisorB { get; set; } = 128;
 
-        [Description("Image loader settings.")]
+        [Description("Image loader buffer size. (Not implemented yet)")]
         public int BufferSize { get; set; } = 512;
     }
 }
