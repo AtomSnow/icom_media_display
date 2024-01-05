@@ -1,4 +1,5 @@
 ﻿using Exiled.API.Interfaces;
+using IcomMediaDisplay.Enums;
 using System.ComponentModel;
 
 namespace IcomMediaDisplay
@@ -22,12 +23,18 @@ namespace IcomMediaDisplay
         public int PlaybackFps { get; set; } = 20;
 
         [Description("Quantizes Bitmap before converting to code, might decrease code size, increases conversion time.")]
-        public bool QuantizeBitmap { get; set; } = true;
+        public bool QuantizeBitmap { get; set; } = false;
         public int DivisorR { get; set; } = 128;
         public int DivisorG { get; set; } = 128;
         public int DivisorB { get; set; } = 128;
 
         [Description("Image loader buffer size. (Not implemented yet)")]
         public int BufferSize { get; set; } = 512;
+
+        [Description("Smart downscaler settings, increases conversion time by a lot. [EXPERTS ONLY]")]
+        public bool UseSmartDownscaler { get; set; } = true;
+        public int Deadzone { get; set; } = 50000;
+        public double ScalingFactor { get; set; } = 0.75;
+        public InterpolationMode Resampling { get; set; } = InterpolationMode.HighQualityBicubic;
     }
 }

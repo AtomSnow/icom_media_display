@@ -105,6 +105,7 @@
   <ItemGroup>
     <Compile Include="Commands\IMD.cs" />
     <Compile Include="Config.cs" />
+    <Compile Include="Enums\InterpolationMode.cs" />
     <Compile Include="Helpers\Compressors.cs" />
     <Compile Include="Helpers\Converters.cs" />
     <Compile Include="IcomMediaDisplay.cs" />

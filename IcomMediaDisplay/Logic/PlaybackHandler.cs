@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Exiled.API.Features;
 using IcomMediaDisplay.Helpers;
 using MEC;
@@ -81,6 +82,9 @@ namespace IcomMediaDisplay.Logic
         {
             try
             {
+                Compressors compressors = new Compressors();
+                int codelen = 0;
+
                 using (FileStream stream = new FileStream(framePath, FileMode.Open, FileAccess.Read))
                 using (Bitmap frame = new Bitmap(stream))
                 {
@@ -88,19 +92,44 @@ namespace IcomMediaDisplay.Logic
 
                     if (IcomMediaDisplay.instance.Config.QuantizeBitmap)
                     {
-                        Compressors compressors = new Compressors();
                         frameToProcess = compressors.QuantizeBitmap(frameToProcess);
                     }
 
                     string tmpRepresentation = ConvertToTMPCode(frameToProcess);
+
+                    if (IcomMediaDisplay.instance.Config.UseSmartDownscaler)
+                    {
+                        int maxSize = IcomMediaDisplay.instance.Config.Deadzone;
+
+                        while (tmpRepresentation.Length > maxSize)
+                        {
+                            //frameToProcess = compressors.Downscale(frameToProcess);
+                            Task<Bitmap> compressorTask = Task.Run(() => compressors.DownscaleAsync(frameToProcess));
+                            frameToProcess = compressorTask.Result;
+                            //tmpRepresentation = ConvertToTMPCode(frameToProcess);
+                            Task<string> conversionTask = Task.Run(() => ConvertToTMPCode(frameToProcess));
+                            tmpRepresentation = conversionTask.Result;
+
+                            if (tmpRepresentation.Length > maxSize)
+                            {
+                                Log.Debug($"Frame {currentFrameIndex} exceeds deadzone after downscaling, retrying until it fits. ({tmpRepresentation.Length} < {maxSize})");
+                            }
+                        }
+                    }
                     Intercom.IntercomDisplay.Network_overrideText = tmpRepresentation;
-                    Log.Debug($"Frame {currentFrameIndex} displayed. Code length: {tmpRepresentation.Length}");
+                    codelen = tmpRepresentation.Length;
                 }
+                Log.Debug($"Frame {currentFrameIndex} displayed. Code length: {codelen}");
             }
             catch (Exception ex)
             {
                 Log.Error($"Error loading frame: {framePath}. Details: {ex}");
             }
+        }
+
+        public async Task<string> ConvertToTMPCodeAsync(Bitmap frame)
+        {
+            return await Task.Run(() => ConvertToTMPCode(frame));
         }
 
         public string ConvertToTMPCode(Bitmap frame)
@@ -136,7 +165,6 @@ namespace IcomMediaDisplay.Logic
 
                 codeBuilder.Append(GetColoredBlock(colorBlock.ToString(), previousColor)).Append("\n");
             }
-
             string codeStr = IcomMediaDisplay.instance.Config.Prefix + codeBuilder.ToString() + IcomMediaDisplay.instance.Config.Suffix;
             string done = Compressors.CompressTMP(codeStr);
             return done;

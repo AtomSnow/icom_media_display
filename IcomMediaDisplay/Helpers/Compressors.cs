@@ -1,4 +1,6 @@
-﻿using System.Drawing;
+﻿using IcomMediaDisplay.Enums;
+using System.Drawing;
+using System.Threading.Tasks;
 
 namespace IcomMediaDisplay.Helpers
 {
@@ -59,5 +61,39 @@ namespace IcomMediaDisplay.Helpers
             }
             return quantizedFrame;
         }
+
+        public async Task<Bitmap> DownscaleAsync(Bitmap original)
+        {
+            return await Task.Run(() => Downscale(original));
+        }
+
+        public Bitmap Downscale(Bitmap original)
+        {
+            double scaleFactor = IcomMediaDisplay.instance.Config.ScalingFactor;
+
+            int newWidth = (int)(original.Width * scaleFactor);
+            int newHeight = (int)(original.Height * scaleFactor);
+
+            Bitmap resizedImage = new Bitmap(newWidth, newHeight);
+
+            using (Graphics g = Graphics.FromImage(resizedImage))
+            {
+                switch (IcomMediaDisplay.instance.Config.Resampling)
+                {
+                    case InterpolationMode.NearestNeighbor:
+                        g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+                        break;
+                    case InterpolationMode.HighQualityBicubic:
+                        g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                        break;
+                    default:
+                        g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                        break;
+                }
+                g.DrawImage(original, 0, 0, newWidth, newHeight);
+            }
+            return resizedImage;
+        }
+
     }
 }
