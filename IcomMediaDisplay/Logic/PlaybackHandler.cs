@@ -24,6 +24,7 @@ namespace IcomMediaDisplay.Logic
         private bool breakPlayback = false;
         public bool isPaused = false;
         private ConcurrentQueue<string> frameQueue = new ConcurrentQueue<string>();
+        public int FrameCount { get; private set; }
 
         public void PlayFrames(string folderPath)
         {
@@ -33,6 +34,8 @@ namespace IcomMediaDisplay.Logic
             frames = unsortedFrames
                 .OrderBy(f => int.Parse(Path.GetFileNameWithoutExtension(f)))
                 .ToArray();
+
+            FrameCount = frames.Length;
 
             if (frames.Length == 0)
             {
@@ -91,7 +94,14 @@ namespace IcomMediaDisplay.Logic
                 if (breakPlayback || isPaused)
                     break;
 
-                await ConvertFrameAsync(framePath); // Convert frame asynchronously
+                try
+                {
+                    await ConvertFrameAsync(framePath); // Convert frame asynchronously
+                }
+                catch (Exception ex)
+                {
+                    Log.Error($"Error loading frame: {framePath}. Details: {ex}");
+                }
             }
         }
 
@@ -128,14 +138,17 @@ namespace IcomMediaDisplay.Logic
 
                             if (tmpRepresentation.Length > maxSize)
                             {
-                                Log.Debug($"Frame {currentFrameIndex} exceeds deadzone after downscaling, retrying until it fits. ({tmpRepresentation.Length} < {maxSize})");
+                                Log.Debug($"Frame {currentFrameIndex}/{FrameCount} exceeds deadzone after downscaling, retrying until it fits. ({tmpRepresentation.Length} < {maxSize})");
                             }
                         }
                     }
+
                     frameQueue.Enqueue(tmpRepresentation);
                     codelen = tmpRepresentation.Length;
+
+                    Log.Debug($"Frame {currentFrameIndex}/{FrameCount} converted and enqueued. Code length: {codelen}");
+                    currentFrameIndex++; // Increment the frame index after successfully enqueuing
                 }
-                Log.Debug($"Frame {currentFrameIndex} converted and enqueued. Code length: {codelen}");
             }
             catch (Exception ex)
             {
