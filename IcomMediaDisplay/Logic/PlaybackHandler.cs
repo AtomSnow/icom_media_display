@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -8,7 +9,8 @@ using System.Threading.Tasks;
 using Exiled.API.Features;
 using IcomMediaDisplay.Helpers;
 using MEC;
-using Time = UnityEngine;
+using UnityEngine;
+using Color = System.Drawing.Color;
 
 namespace IcomMediaDisplay.Logic
 {
@@ -21,7 +23,7 @@ namespace IcomMediaDisplay.Logic
         public int VideoFps = IcomMediaDisplay.instance.Config.PlaybackFps;
         private bool breakPlayback = false;
         public bool isPaused = false;
-        //private const float WarningThreshold = 0.95f;
+        private ConcurrentQueue<string> frameQueue = new ConcurrentQueue<string>();
 
         public void PlayFrames(string folderPath)
         {
@@ -40,14 +42,15 @@ namespace IcomMediaDisplay.Logic
             }
 
             targetFrameDurationInSeconds = 1.0f / VideoFps; // Set the target frame duration
-            Timing.RunCoroutine(PlayFramesCoroutine()); // Start coroutine to play frames
+            Task.Run(async () => await ConvertAndEnqueueFrames(frames));
+            Timing.RunCoroutine(PlayFramesCoroutine());
         }
 
         private IEnumerator<float> PlayFramesCoroutine()
         {
             float frameDuration = 1.0f / VideoFps;
-            var startTime = Time.Time.time;
-            var nextFrameTime = startTime + frameDuration;
+            float startTime = Time.time;
+            float nextFrameTime = startTime + frameDuration;
 
             while (currentFrameIndex < frames.Length)
             {
@@ -63,22 +66,36 @@ namespace IcomMediaDisplay.Logic
                     continue; // Skip to the next iteration if paused
                 }
 
-                string framePath = frames[currentFrameIndex];
-                LoadAndDisplayFrame(framePath);
-
-                float currentTime = Time.Time.time;
-
-                if (currentTime < nextFrameTime)
+                if (frameQueue.TryDequeue(out string tmpRepresentation))
                 {
-                    yield return Timing.WaitForSeconds(nextFrameTime - currentTime);
+                    Intercom.IntercomDisplay.Network_overrideText = tmpRepresentation;
+                    currentFrameIndex++; // Move to the next frame
                 }
 
+                float currentTime = Time.time;
+                float timeRemaining = nextFrameTime - currentTime;
+
+                if (timeRemaining > 0)
+                {
+                    yield return Timing.WaitForSeconds(timeRemaining);
+                }
                 nextFrameTime += frameDuration;
-                currentFrameIndex++; // Move to the next frame
             }
         }
 
-        private void LoadAndDisplayFrame(string framePath)
+
+        private async Task ConvertAndEnqueueFrames(string[] frames)
+        {
+            foreach (var framePath in frames)
+            {
+                if (breakPlayback || isPaused)
+                    break;
+
+                await ConvertFrameAsync(framePath); // Convert frame asynchronously
+            }
+        }
+
+        private async Task ConvertFrameAsync(string framePath)
         {
             try
             {
@@ -95,7 +112,7 @@ namespace IcomMediaDisplay.Logic
                         frameToProcess = compressors.QuantizeBitmap(frameToProcess);
                     }
 
-                    string tmpRepresentation = ConvertToTMPCode(frameToProcess);
+                    string tmpRepresentation = await ConvertToTMPCodeAsync(frameToProcess);
 
                     if (IcomMediaDisplay.instance.Config.UseSmartDownscaler)
                     {
@@ -103,12 +120,11 @@ namespace IcomMediaDisplay.Logic
 
                         while (tmpRepresentation.Length > maxSize)
                         {
-                            //frameToProcess = compressors.Downscale(frameToProcess);
                             Task<Bitmap> compressorTask = Task.Run(() => compressors.DownscaleAsync(frameToProcess));
-                            frameToProcess = compressorTask.Result;
-                            //tmpRepresentation = ConvertToTMPCode(frameToProcess);
+                            frameToProcess = await compressorTask;
+
                             Task<string> conversionTask = Task.Run(() => ConvertToTMPCode(frameToProcess));
-                            tmpRepresentation = conversionTask.Result;
+                            tmpRepresentation = await conversionTask;
 
                             if (tmpRepresentation.Length > maxSize)
                             {
@@ -116,10 +132,10 @@ namespace IcomMediaDisplay.Logic
                             }
                         }
                     }
-                    Intercom.IntercomDisplay.Network_overrideText = tmpRepresentation;
+                    frameQueue.Enqueue(tmpRepresentation);
                     codelen = tmpRepresentation.Length;
                 }
-                Log.Debug($"Frame {currentFrameIndex} displayed. Code length: {codelen}");
+                Log.Debug($"Frame {currentFrameIndex} converted and enqueued. Code length: {codelen}");
             }
             catch (Exception ex)
             {
@@ -162,7 +178,6 @@ namespace IcomMediaDisplay.Logic
                     colorBlock.Append(IcomMediaDisplay.instance.Config.Pixel);
                     previousColor = pixelColor;
                 }
-
                 codeBuilder.Append(GetColoredBlock(colorBlock.ToString(), previousColor)).Append("\n");
             }
             string codeStr = IcomMediaDisplay.instance.Config.Prefix + codeBuilder.ToString() + IcomMediaDisplay.instance.Config.Suffix;

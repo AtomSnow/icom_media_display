@@ -28,9 +28,6 @@ namespace IcomMediaDisplay
         public int DivisorG { get; set; } = 128;
         public int DivisorB { get; set; } = 128;
 
-        [Description("Image loader buffer size. (Not implemented yet)")]
-        public int BufferSize { get; set; } = 512;
-
         [Description("Smart downscaler settings, increases conversion time by a lot. [EXPERTS ONLY]")]
         public bool UseSmartDownscaler { get; set; } = true;
         public int Deadzone { get; set; } = 50000;
