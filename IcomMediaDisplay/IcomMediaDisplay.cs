@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Exiled.API.Features;
+using IcomMediaDisplay.Logic;
 
 namespace IcomMediaDisplay
 {
@@ -25,13 +26,17 @@ namespace IcomMediaDisplay
             {
                 Directory.CreateDirectory(tempdir);
             }
-            Log.Info("\n_____________  __________ \r\n____  _/__   |/  /__  __ \\\r\n __  / __  /|_/ /__  / / /\r\n__/ /  _  /  / / _  /_/ / \r\n/___/  /_/  /_/  /_____/  ");
+            //Log.Info("\n_____________  __________ \r\n____  _/__   |/  /__  __ \\\r\n __  / __  /|_/ /__  / / /\r\n__/ /  _  /  / / _  /_/ / \r\n/___/  /_/  /_/  /_____/  ");
             base.OnEnabled();
         }
 
         public override void OnDisabled()
         {
+            PlaybackHandler playbackHandler = new PlaybackHandler();
+            playbackHandler.BreakFromPlayback();
+            playbackHandler = null; // This is probably not needed but just making sure.
             instance = null;
+            ev = null;
             base.OnDisabled();
         }
     }

@@ -1,14 +1,6 @@
-﻿using RemoteAdmin;
-using CommandSystem;
+﻿using CommandSystem;
 using System;
 using IcomMediaDisplay.Logic;
-using IcomMediaDisplay.Helpers;
-using Exiled.API.Features;
-using MEC;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Net.Http;
-using System.Net;
 using Exiled.Permissions.Extensions;
 
 namespace IcomMediaDisplay.Commands
@@ -19,8 +11,6 @@ namespace IcomMediaDisplay.Commands
         public string Command => "icommediadisplay";
         public string[] Aliases => new[] { "imd" };
         public string Description => "Play a Media on Intercom.";
-
-        //private PlaybackHandler playbackHandler;
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
@@ -71,6 +61,12 @@ namespace IcomMediaDisplay.Commands
                         response = "Resumed playback.";
                     }
                     return false;
+                case "mod":
+                    string field = arguments.At(0).ToLower();
+
+                    response = ".";
+                    return false;
+
                 case "help":
                     /*
 
@@ -79,6 +75,7 @@ imd play <folderID> - Plays frames from a directory/container.
 imd pause - Pause Playback.
 imd stop - Abort Playback.
 imd help - This.
+imd mod <value> - Modify value of some config fields.
 
                     */
                     response = "--- Subcommands ---\r\nimd play <folderID> - Plays frames from a directory/container.\r\nimd pause - Pause Playback.\r\nimd stop - Abort Playback.\r\nimd help - This.";

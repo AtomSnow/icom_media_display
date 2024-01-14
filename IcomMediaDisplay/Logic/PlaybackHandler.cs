@@ -18,8 +18,8 @@ namespace IcomMediaDisplay.Logic
     {
         private int currentFrameIndex = 0;
         private string[] frames;
-        private float targetFrameDurationInSeconds;
-        public float delayTime;
+        private double targetFrameDurationInSeconds;
+        public double delayTime;
         public int VideoFps = IcomMediaDisplay.instance.Config.PlaybackFps;
         private bool breakPlayback = false;
         public bool isPaused = false;
@@ -96,7 +96,7 @@ namespace IcomMediaDisplay.Logic
 
                 try
                 {
-                    await ConvertFrameAsync(framePath); // Convert frame asynchronously
+                    await ConvertFrameAsync(framePath); // Async convert (cooler than previous method)
                 }
                 catch (Exception ex)
                 {
@@ -147,7 +147,7 @@ namespace IcomMediaDisplay.Logic
                     codelen = tmpRepresentation.Length;
 
                     Log.Debug($"Frame {currentFrameIndex}/{FrameCount} converted and enqueued. Code length: {codelen}");
-                    currentFrameIndex++; // Increment the frame index after successfully enqueuing
+                    currentFrameIndex++;
                 }
             }
             catch (Exception ex)
@@ -167,7 +167,7 @@ namespace IcomMediaDisplay.Logic
             int width = frame.Width;
             StringBuilder codeBuilder = new StringBuilder();
 
-            Color previousColor = Color.Empty; // Track the previous color
+            Color previousColor = Color.Empty;
             StringBuilder colorBlock = new StringBuilder();
 
             for (int y = 0; y < height; y++)
@@ -218,6 +218,5 @@ namespace IcomMediaDisplay.Logic
         {
             isPaused = false;
         }
-
     }
 }
