@@ -23,7 +23,7 @@ The IcomMediaDisplay (IMD) plugin for SCP: Secret Laboratory enhances the Interc
 ## Usage
 - Open a terminal or command prompt on your computer.
 - Use the cd command to navigate to the directory where your video file is located.
-- Use the following FFmpeg command to export frames from the video, scaling them down by a factor of 10 or your desired one (please do this, do not use absolute size, do not torture your server), and using the %d notation for the output filename `ffmpeg -i input.mp4 -vf "scale=iw/10:ih/10" output/frame_%d.png`
+- Use the following FFmpeg command to export frames from the video, scaling them down by a factor of 10 or your desired one (please do this, do not use absolute size, do not torture your server), and using the %d notation for the output filename `ffmpeg -i input.mp4 -vf "scale=iw/10:ih/10" output/%d.png` (create output folder before executing the command!)
 - Change the output folder to desired one, for example `Billy_Herrington`
 - Place it in `.config/EXILED/Plugins/IcomMediaDisplay/`
 - Use command play, for example `imd play Billy_Herrington`
