@@ -51,9 +51,9 @@ namespace IcomMediaDisplay.Helpers
 
                     // Quantize colors by rounding their components to reduce the number of distinct colors
                     Color quantizedColor = Color.FromArgb(
-                        (pixelColor.R / IcomMediaDisplay.instance.Config.DivisorR) * IcomMediaDisplay.instance.Config.DivisorR,
-                        (pixelColor.G / IcomMediaDisplay.instance.Config.DivisorG) * IcomMediaDisplay.instance.Config.DivisorG,
-                        (pixelColor.B / IcomMediaDisplay.instance.Config.DivisorB) * IcomMediaDisplay.instance.Config.DivisorB
+                        (pixelColor.R / IcomMediaDisplay.Instance.Config.DivisorR) * IcomMediaDisplay.Instance.Config.DivisorR,
+                        (pixelColor.G / IcomMediaDisplay.Instance.Config.DivisorG) * IcomMediaDisplay.Instance.Config.DivisorG,
+                        (pixelColor.B / IcomMediaDisplay.Instance.Config.DivisorB) * IcomMediaDisplay.Instance.Config.DivisorB
                     );
 
                     quantizedFrame.SetPixel(x, y, quantizedColor);
@@ -69,7 +69,7 @@ namespace IcomMediaDisplay.Helpers
 
         public Bitmap Downscale(Bitmap original)
         {
-            double scaleFactor = IcomMediaDisplay.instance.Config.ScalingFactor;
+            double scaleFactor = IcomMediaDisplay.Instance.Config.ScalingFactor;
 
             int newWidth = (int)(original.Width * scaleFactor);
             int newHeight = (int)(original.Height * scaleFactor);
@@ -78,7 +78,7 @@ namespace IcomMediaDisplay.Helpers
 
             using (Graphics g = Graphics.FromImage(resizedImage))
             {
-                switch (IcomMediaDisplay.instance.Config.Resampling)
+                switch (IcomMediaDisplay.Instance.Config.Resampling)
                 {
                     case InterpolationMode.NearestNeighbor:
                         g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;

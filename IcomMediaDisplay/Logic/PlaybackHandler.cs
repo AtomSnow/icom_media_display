@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
 using System.Drawing;
-using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Exiled.API.Features;
 using IcomMediaDisplay.Helpers;
 using MEC;
@@ -18,22 +13,24 @@ namespace IcomMediaDisplay.Logic
     {
         private int currentFrameIndex = 0;
         private string[] frames;
-        private double targetFrameDurationInSeconds;
         public double delayTime;
-        public int VideoFps = IcomMediaDisplay.instance.Config.PlaybackFps;
+        public int VideoFps {  get; set; }
         private bool breakPlayback = false;
         public bool isPaused = false;
-        private ConcurrentQueue<string> frameQueue = new ConcurrentQueue<string>();
+        private ConcurrentQueue<string> frameQueue = new();
         public int FrameCount { get; private set; }
+
+        public PlaybackHandler()
+        {
+            VideoFps = IcomMediaDisplay.Instance.Config.PlaybackFps;
+        }
 
         public void PlayFrames(string folderPath)
         {
             Log.Debug("Called PlayFrames");
             string[] unsortedFrames = Directory.GetFiles(folderPath, "*.png");
 
-            frames = unsortedFrames
-                .OrderBy(f => int.Parse(Path.GetFileNameWithoutExtension(f)))
-                .ToArray();
+            frames = [.. unsortedFrames.OrderBy(f => int.Parse(Path.GetFileNameWithoutExtension(f)))];
 
             FrameCount = frames.Length;
 
@@ -44,7 +41,6 @@ namespace IcomMediaDisplay.Logic
                 throw new Exception(msg);
             }
 
-            targetFrameDurationInSeconds = 1.0f / VideoFps; // Set the target frame duration
             Task.Run(async () => await ConvertAndEnqueueFrames(frames));
             Timing.RunCoroutine(PlayFramesCoroutine());
         }
@@ -112,21 +108,21 @@ namespace IcomMediaDisplay.Logic
                 Compressors compressors = new Compressors();
                 int codelen = 0;
 
-                using (FileStream stream = new FileStream(framePath, FileMode.Open, FileAccess.Read))
-                using (Bitmap frame = new Bitmap(stream))
+                using (FileStream stream = new(framePath, FileMode.Open, FileAccess.Read))
+                using (Bitmap frame = new(stream))
                 {
                     Bitmap frameToProcess = frame;
 
-                    if (IcomMediaDisplay.instance.Config.QuantizeBitmap)
+                    if (IcomMediaDisplay.Instance.Config.QuantizeBitmap)
                     {
                         frameToProcess = compressors.QuantizeBitmap(frameToProcess);
                     }
 
                     string tmpRepresentation = await ConvertToTMPCodeAsync(frameToProcess);
 
-                    if (IcomMediaDisplay.instance.Config.UseSmartDownscaler)
+                    if (IcomMediaDisplay.Instance.Config.UseSmartDownscaler)
                     {
-                        int maxSize = IcomMediaDisplay.instance.Config.Deadzone;
+                        int maxSize = IcomMediaDisplay.Instance.Config.Deadzone;
 
                         while (tmpRepresentation.Length > maxSize)
                         {
@@ -165,11 +161,10 @@ namespace IcomMediaDisplay.Logic
         {
             int height = frame.Height;
             int width = frame.Width;
-            StringBuilder codeBuilder = new StringBuilder();
-
+            StringBuilder codeBuilder = new();
+            StringBuilder colorBlock = new();
             Color previousColor = Color.Empty;
-            StringBuilder colorBlock = new StringBuilder();
-
+            
             for (int y = 0; y < height; y++)
             {
                 colorBlock.Clear(); // Clear the color block for each new row
@@ -188,20 +183,18 @@ namespace IcomMediaDisplay.Logic
                         }
                     }
 
-                    colorBlock.Append(IcomMediaDisplay.instance.Config.Pixel);
+                    colorBlock.Append(IcomMediaDisplay.Instance.Config.Pixel);
                     previousColor = pixelColor;
                 }
                 codeBuilder.Append(GetColoredBlock(colorBlock.ToString(), previousColor)).Append("\n");
             }
-            string codeStr = IcomMediaDisplay.instance.Config.Prefix + codeBuilder.ToString() + IcomMediaDisplay.instance.Config.Suffix;
-            string done = Compressors.CompressTMP(codeStr);
-            return done;
+            string codeStr = IcomMediaDisplay.Instance.Config.Prefix + codeBuilder.ToString() + IcomMediaDisplay.Instance.Config.Suffix;
+            return Compressors.CompressTMP(codeStr);
         }
 
         private string GetColoredBlock(string content, Color color)
         {
-            string hexValue = "#" + Converters.RgbToHex(color);
-            return $"<color={hexValue}>{content}</color>";
+            return $"<color=#{Converters.RgbToHex(color)}>{content}</color>";
         }
 
         public void BreakFromPlayback()

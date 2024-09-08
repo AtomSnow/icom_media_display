@@ -1,5 +1,4 @@
 ﻿using CommandSystem;
-using System;
 using IcomMediaDisplay.Logic;
 using Exiled.Permissions.Extensions;
 
@@ -9,8 +8,10 @@ namespace IcomMediaDisplay.Commands
     public class IMD : ICommand
     {
         public string Command => "icommediadisplay";
-        public string[] Aliases => new[] { "imd" };
+        public string[] Aliases => ["imd"];
         public string Description => "Play a Media on Intercom.";
+
+        PlaybackHandler playbackHandler;
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
@@ -19,8 +20,7 @@ namespace IcomMediaDisplay.Commands
                 response = "You do not have permission to use this command!";
                 return false;
             }
-
-            PlaybackHandler playbackHandler = new PlaybackHandler();
+            playbackHandler = IcomMediaDisplay.GetPHInstance();
             switch (arguments.At(0))
             {
                 case "play":
@@ -36,7 +36,7 @@ namespace IcomMediaDisplay.Commands
                     }
                     try
                     {
-                        playbackHandler.PlayFrames(IcomMediaDisplay.tempdir + "/" + arguments.At(1));
+                        playbackHandler.PlayFrames(IcomMediaDisplay.PluginDirectory + "/" + arguments.At(1));
                         response = "Playback started (Keep an eye on Server console, if debug enabled).";
                         return false;
                     }
@@ -62,9 +62,21 @@ namespace IcomMediaDisplay.Commands
                     }
                     return false;
                 case "mod":
-                    string field = arguments.At(0).ToLower();
-
-                    response = ".";
+                    string field = arguments.At(1).ToLower();
+                    string value = arguments.At(2).ToLower();
+                    if (field == "fps")
+                    {
+                        try
+                        {
+                            playbackHandler.VideoFps = int.Parse(value);
+                        }
+                        catch (Exception ex)
+                        {
+                            response = $"Failed to modify field: " + ex.Message;
+                            return false;
+                        }
+                    }
+                    response = $"Field {field} has been modified to {value}";
                     return false;
 
                 case "help":
@@ -78,7 +90,7 @@ imd help - This.
 imd mod <value> - Modify value of some config fields.
 
                     */
-                    response = "--- Subcommands ---\r\nimd play <folderID> - Plays frames from a directory/container.\r\nimd pause - Pause Playback.\r\nimd stop - Abort Playback.\r\nimd help - This.";
+                    response = "--- Subcommands ---\r\nimd play <folderID> - Plays frames from a directory/container.\r\nimd pause - Pause Playback.\r\nimd stop - Abort Playback.\r\nimd help - This.\r\nimd mod <value> - Modify value of some config fields.";
                     return false;
                 default:
                     response = "Unknown subcommand. Use 'imd help' for syntax.";

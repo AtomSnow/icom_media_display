@@ -7,24 +7,23 @@ namespace IcomMediaDisplay
 {
     public class IcomMediaDisplay : Plugin<Config>
     {
-        public static IcomMediaDisplay instance { get; private set; }
-        private EventHandler ev { get; set; }
-
-        public static string tempdir => Path.Combine(Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EXILED"), "Plugins"), "IcomMediaDisplay");
+        public static IcomMediaDisplay Instance { get; private set; }
+        public static string PluginDirectory => Path.Combine(Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EXILED"), "Plugins"), "IcomMediaDisplay");
+        private static PlaybackHandler _playbackHandler;
 
         // Plugin information
         public override string Name => "IcomMediaDisplay";
         public override string Prefix { get; } = "IcomMediaDisplay";
-        public override string Author { get; } = "Mitsukia";
+        public override string Author { get; } = "Skadi";
         public override Version Version { get; } = new Version(2, 0, 0);
-        public override Version RequiredExiledVersion { get; } = new Version(8, 3, 9);
+        public override Version RequiredExiledVersion { get; } = new Version(8, 11, 0);
 
         public override void OnEnabled()
         {
-            instance = this;
-            if (!Directory.Exists(tempdir))
+            Instance = this;
+            if (!Directory.Exists(PluginDirectory))
             {
-                Directory.CreateDirectory(tempdir);
+                Directory.CreateDirectory(PluginDirectory);
             }
             //Log.Info("\n_____________  __________ \r\n____  _/__   |/  /__  __ \\\r\n __  / __  /|_/ /__  / / /\r\n__/ /  _  /  / / _  /_/ / \r\n/___/  /_/  /_/  /_____/  ");
             base.OnEnabled();
@@ -32,12 +31,15 @@ namespace IcomMediaDisplay
 
         public override void OnDisabled()
         {
-            PlaybackHandler playbackHandler = new PlaybackHandler();
-            playbackHandler.BreakFromPlayback();
-            playbackHandler = null; // This is probably not needed but just making sure.
-            instance = null;
-            ev = null;
+            Instance = null;
+            _playbackHandler = null;
             base.OnDisabled();
+        }
+
+        public static PlaybackHandler GetPHInstance()
+        {
+            _playbackHandler ??= new PlaybackHandler();
+            return _playbackHandler;
         }
     }
 }

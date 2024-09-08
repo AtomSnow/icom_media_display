@@ -12,8 +12,8 @@ namespace IcomMediaDisplay
         [Description("Whether or not the debug info should be printed out.")]
         public bool Debug { get; set; } = false;
 
-        [Description("An pixel character to display.")]
-        public string Pixel { get; set; } = "█";
+        [Description("A pixel character to display.")]
+        public char Pixel { get; set; } = '█';
 
         [Description("Icomtxt code Prefix and Suffix.")]
         public string Prefix { get; set; } = "<line-height=89%>";
