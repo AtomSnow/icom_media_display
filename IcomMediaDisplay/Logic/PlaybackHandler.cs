@@ -11,17 +11,21 @@ namespace IcomMediaDisplay.Logic
 {
     public class PlaybackHandler
     {
-        private int currentFrameIndex = 0;
+        private long currentFrameIndex;
         private string[] frames;
-        public double delayTime;
-        public int VideoFps {  get; set; }
-        private bool breakPlayback = false;
-        public bool isPaused = false;
-        private ConcurrentQueue<string> frameQueue = new();
-        public int FrameCount { get; private set; }
+        private bool breakPlayback;
+        private readonly ConcurrentQueue<string> frameQueue;
+        // Public
+        public long FrameCount { get; private set; }
+        public int VideoFps { get; set; }
+        public bool IsPaused { get; private set; }
 
         public PlaybackHandler()
         {
+            breakPlayback = false;
+            frameQueue = new();
+            currentFrameIndex = 0;
+            IsPaused = false;
             VideoFps = IcomMediaDisplay.Instance.Config.PlaybackFps;
         }
 
@@ -30,7 +34,7 @@ namespace IcomMediaDisplay.Logic
             Log.Debug("Called PlayFrames");
             string[] unsortedFrames = Directory.GetFiles(folderPath, "*.png");
 
-            frames = [.. unsortedFrames.OrderBy(f => int.Parse(Path.GetFileNameWithoutExtension(f)))];
+            frames = [.. unsortedFrames.OrderBy(f => long.Parse(Path.GetFileNameWithoutExtension(f)))];
 
             FrameCount = frames.Length;
 
@@ -59,7 +63,7 @@ namespace IcomMediaDisplay.Logic
                     yield break; // Exit the coroutine
                 }
 
-                if (isPaused)
+                if (IsPaused)
                 {
                     yield return 0;
                     continue; // Skip to the next iteration if paused
@@ -87,7 +91,7 @@ namespace IcomMediaDisplay.Logic
         {
             foreach (var framePath in frames)
             {
-                if (breakPlayback || isPaused)
+                if (breakPlayback || IsPaused)
                     break;
 
                 try
@@ -103,52 +107,43 @@ namespace IcomMediaDisplay.Logic
 
         private async Task ConvertFrameAsync(string framePath)
         {
-            try
+            long codelen = 0;
+            using (FileStream stream = new(framePath, FileMode.Open, FileAccess.Read))
+            using (Bitmap frame = new(stream))
             {
-                Compressors compressors = new Compressors();
-                int codelen = 0;
+                Bitmap frameToProcess = frame;
 
-                using (FileStream stream = new(framePath, FileMode.Open, FileAccess.Read))
-                using (Bitmap frame = new(stream))
+                if (IcomMediaDisplay.Instance.Config.QuantizeBitmap)
                 {
-                    Bitmap frameToProcess = frame;
+                    frameToProcess = Compressors.QuantizeBitmap(frameToProcess);
+                }
 
-                    if (IcomMediaDisplay.Instance.Config.QuantizeBitmap)
+                string tmpRepresentation = await ConvertToTMPCodeAsync(frameToProcess);
+
+                if (IcomMediaDisplay.Instance.Config.UseSmartDownscaler)
+                {
+                    long maxSize = IcomMediaDisplay.Instance.Config.Deadzone;
+
+                    while (tmpRepresentation.Length > maxSize)
                     {
-                        frameToProcess = compressors.QuantizeBitmap(frameToProcess);
-                    }
+                        Task<Bitmap> compressorTask = Task.Run(() => Compressors.DownscaleAsync(frameToProcess));
+                        frameToProcess = await compressorTask;
 
-                    string tmpRepresentation = await ConvertToTMPCodeAsync(frameToProcess);
+                        Task<string> conversionTask = Task.Run(() => ConvertToTMPCode(frameToProcess));
+                        tmpRepresentation = await conversionTask;
 
-                    if (IcomMediaDisplay.Instance.Config.UseSmartDownscaler)
-                    {
-                        int maxSize = IcomMediaDisplay.Instance.Config.Deadzone;
-
-                        while (tmpRepresentation.Length > maxSize)
+                        if (tmpRepresentation.Length > maxSize)
                         {
-                            Task<Bitmap> compressorTask = Task.Run(() => compressors.DownscaleAsync(frameToProcess));
-                            frameToProcess = await compressorTask;
-
-                            Task<string> conversionTask = Task.Run(() => ConvertToTMPCode(frameToProcess));
-                            tmpRepresentation = await conversionTask;
-
-                            if (tmpRepresentation.Length > maxSize)
-                            {
-                                Log.Debug($"Frame {currentFrameIndex}/{FrameCount} exceeds deadzone after downscaling, retrying until it fits. ({tmpRepresentation.Length} < {maxSize})");
-                            }
+                            Log.Debug($"Frame {currentFrameIndex}/{FrameCount} exceeds deadzone after downscaling, retrying until it fits. ({tmpRepresentation.Length} < {maxSize})");
                         }
                     }
-
-                    frameQueue.Enqueue(tmpRepresentation);
-                    codelen = tmpRepresentation.Length;
-
-                    Log.Debug($"Frame {currentFrameIndex}/{FrameCount} converted and enqueued. Code length: {codelen}");
-                    currentFrameIndex++;
                 }
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"Error loading frame: {framePath}. Details: {ex}");
+
+                frameQueue.Enqueue(tmpRepresentation);
+                codelen = tmpRepresentation.Length;
+
+                Log.Debug($"Frame {currentFrameIndex}/{FrameCount} converted and enqueued. Code length: {codelen}");
+                currentFrameIndex++;
             }
         }
 
@@ -204,12 +199,12 @@ namespace IcomMediaDisplay.Logic
 
         public void PausePlayback()
         {
-            isPaused = true;
+            IsPaused = true;
         }
 
         public void ResumePlayback()
         {
-            isPaused = false;
+            IsPaused = false;
         }
     }
 }

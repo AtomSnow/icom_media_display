@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using Exiled.API.Features;
+﻿using Exiled.API.Features;
 using IcomMediaDisplay.Logic;
 
 namespace IcomMediaDisplay
@@ -15,7 +13,7 @@ namespace IcomMediaDisplay
         public override string Name => "IcomMediaDisplay";
         public override string Prefix { get; } = "IcomMediaDisplay";
         public override string Author { get; } = "Skadi";
-        public override Version Version { get; } = new Version(2, 0, 0);
+        public override Version Version { get; } = new Version(2, 0, 1);
         public override Version RequiredExiledVersion { get; } = new Version(8, 11, 0);
 
         public override void OnEnabled()

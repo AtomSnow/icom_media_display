@@ -38,19 +38,19 @@ namespace IcomMediaDisplay.Commands
                     {
                         playbackHandler.PlayFrames(IcomMediaDisplay.PluginDirectory + "/" + arguments.At(1));
                         response = "Playback started (Keep an eye on Server console, if debug enabled).";
-                        return false;
+                        return true;
                     }
                     catch (Exception ex)
                     {
-                        response = "Failed to start playback. Error: " + ex.Message;
+                        response = "Failed to start playback. Error: " + $"{ex.Message}\n{ex.StackTrace}";
                         return false;
                     }
                 case "break":
                     playbackHandler.BreakFromPlayback();
                     response = "Stopped playback.";
-                    return false;
+                    return true;
                 case "pause":
-                    if (!playbackHandler.isPaused)
+                    if (!playbackHandler.IsPaused)
                     {
                         playbackHandler.PausePlayback();
                         response = "Paused playback.";
@@ -60,7 +60,7 @@ namespace IcomMediaDisplay.Commands
                         playbackHandler.ResumePlayback();
                         response = "Resumed playback.";
                     }
-                    return false;
+                    return true;
                 case "mod":
                     string field = arguments.At(1).ToLower();
                     string value = arguments.At(2).ToLower();
@@ -77,7 +77,7 @@ namespace IcomMediaDisplay.Commands
                         }
                     }
                     response = $"Field {field} has been modified to {value}";
-                    return false;
+                    return true;
 
                 case "help":
                     /*
@@ -91,7 +91,7 @@ imd mod <value> - Modify value of some config fields.
 
                     */
                     response = "--- Subcommands ---\r\nimd play <folderID> - Plays frames from a directory/container.\r\nimd pause - Pause Playback.\r\nimd stop - Abort Playback.\r\nimd help - This.\r\nimd mod <value> - Modify value of some config fields.";
-                    return false;
+                    return true;
                 default:
                     response = "Unknown subcommand. Use 'imd help' for syntax.";
                     return false;

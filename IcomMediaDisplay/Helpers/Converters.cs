@@ -1,14 +1,8 @@
-﻿using System;
-using System.Diagnostics;
-using System.Drawing;
-using System.IO;
-using System.Net.Sockets;
-using System.Text;
-using Exiled.API.Features;
+﻿using System.Drawing;
 
 namespace IcomMediaDisplay.Helpers
 {
-    public class Converters
+    public static class Converters
     {
         public static string RgbToHex(Color color)
         {
