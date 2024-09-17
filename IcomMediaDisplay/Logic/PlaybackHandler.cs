@@ -86,13 +86,11 @@ namespace IcomMediaDisplay.Logic
             }
         }
 
-
         private async Task ConvertAndEnqueueFrames(string[] frames)
         {
             foreach (var framePath in frames)
             {
-                if (breakPlayback || IsPaused)
-                    break;
+                if (breakPlayback || IsPaused) break;
 
                 try
                 {
@@ -141,7 +139,6 @@ namespace IcomMediaDisplay.Logic
 
                 frameQueue.Enqueue(tmpRepresentation);
                 codelen = tmpRepresentation.Length;
-
                 Log.Debug($"Frame {currentFrameIndex}/{FrameCount} converted and enqueued. Code length: {codelen}");
                 currentFrameIndex++;
             }
