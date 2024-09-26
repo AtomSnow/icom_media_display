@@ -11,13 +11,13 @@ namespace IcomMediaDisplay.Logic
 {
     public class PlaybackHandler
     {
-        private long currentFrameIndex;
+        private ulong currentFrameIndex;
         private string[] frames;
         private bool breakPlayback;
         private readonly ConcurrentQueue<string> frameQueue;
         // Public
-        public long FrameCount { get; private set; }
-        public int VideoFps { get; set; }
+        public ulong FrameCount { get; private set; }
+        public ushort VideoFps { get; set; }
         public bool IsPaused { get; private set; }
 
         public PlaybackHandler()
