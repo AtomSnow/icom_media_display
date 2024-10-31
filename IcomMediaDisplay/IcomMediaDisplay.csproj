@@ -9,15 +9,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="EXILEDOFFICIAL" Version="8.11.0" />
+    <PackageReference Include="ExMod.Exiled" Version="8.13.1" />
   </ItemGroup>
 
   <ItemGroup>
     <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>..\..\..\..\Downloads\Assembly-CSharp-firstpass.dll</HintPath>
+      <HintPath>C:\Users\kohakow\Downloads\steamcmd\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\..\..\..\Downloads\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>C:\Users\kohakow\Downloads\steamcmd\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
   </ItemGroup>
 

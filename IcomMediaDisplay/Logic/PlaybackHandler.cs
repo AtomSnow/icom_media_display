@@ -36,7 +36,7 @@ namespace IcomMediaDisplay.Logic
 
             frames = [.. unsortedFrames.OrderBy(f => long.Parse(Path.GetFileNameWithoutExtension(f)))];
 
-            FrameCount = frames.Length;
+            FrameCount = (ulong)frames.Length;
 
             if (frames.Length == 0)
             {
