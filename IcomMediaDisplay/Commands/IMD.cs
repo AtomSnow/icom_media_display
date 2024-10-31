@@ -68,7 +68,7 @@ namespace IcomMediaDisplay.Commands
                     {
                         try
                         {
-                            playbackHandler.VideoFps = int.Parse(value);
+                            playbackHandler.VideoFps = ushort.Parse(value);
                         }
                         catch (Exception ex)
                         {

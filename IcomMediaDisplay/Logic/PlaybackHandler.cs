@@ -55,7 +55,7 @@ namespace IcomMediaDisplay.Logic
             float startTime = Time.time;
             float nextFrameTime = startTime + frameDuration;
 
-            while (currentFrameIndex < frames.Length)
+            while (currentFrameIndex < (ulong)frames.Length)
             {
                 if (breakPlayback)
                 {

@@ -20,7 +20,7 @@ namespace IcomMediaDisplay
         public string Suffix { get; set; } = "";
 
         [Description("Default FPS of playback.")]
-        public int PlaybackFps { get; set; } = 20;
+        public ushort PlaybackFps { get; set; } = 20;
 
         [Description("Quantizes Bitmap before converting to code, might decrease code size, increases conversion time.")]
         public bool QuantizeBitmap { get; set; } = false;
